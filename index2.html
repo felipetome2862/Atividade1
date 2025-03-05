@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integração Completa</title>
+
+</head>
+<body onload="listarUsuarios()">
+    <header>
+        <h2>Mini-Projeto de Integração</h2>
+    </header>
+    
+    <section>
+        <h3>Listar Dados</h3>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Email</th>
+                <th>Idade</th>
+            </tr>
+            <tbody id="tbUsuarios"></tbody>
+        </table>
+    </section>
+    
+    <section>
+        <h3>Cadastrar Novo</h3>
+        <form onsubmit="cadastrarUsuario(event)">
+            <input type="text" id="nome" placeholder="Nome" required>
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="number" id="idade" placeholder="Idade" required>
+            <button type="submit">Cadastrar</button>
+        </form>
+    </section>
+    
+    <script>
+        const API_URL = "https://67bfa402b9d02a9f2246bfcd.mockapi.io/usuario";
+
+        function listarUsuarios() {
+            fetch(API_URL)
+            .then(response => response.json())
+            .then(dados => {
+                let tbUsuario = document.getElementById("tbUsuarios");
+                tbUsuario.innerHTML = "";
+                
+                dados.forEach(user => {
+                    const linha = document.createElement("tr");
+                    linha.innerHTML = `
+                        <td>${user.id}</td>
+                        <td>${user.nome}</td>
+                        <td>${user.email}</td>
+                        <td>${user.idade}</td>
+                    `;
+                    tbUsuario.appendChild(linha);
+                });
+            });
+        }
+        
+        function cadastrarUsuario(event) {
+            event.preventDefault();
+            
+            const nome = document.getElementById("nome").value;
+            const email = document.getElementById("email").value;
+            const idade = document.getElementById("idade").value;
+            
+            fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nome, email, idade })
+            })
+            .then(response => response.json())
+            .then(() => {
+                listarUsuarios(); // Atualiza a lista
+                document.querySelector("form").reset(); // Limpa o formulário
+            });
+        }
+    </script>
+</body>
+</html>

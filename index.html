@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Correção</title>
+    <title>Lista de Exercicio</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body id="tema" class="temaClaro fontX" onload="carregar()">
@@ -29,19 +29,29 @@
 
       <h2>Exercício 5</h2>
       <form onsubmit="cadastrarUsuario(event)">
-        <p>Nome: <input type="text" id="nome" required /></p>
-        <p>Email: <input type="email" id="email" required /></p>
-        <p>Idade: <input type="number" id="idade" required /></p>
+        <p>
+          Nome: <input type="text" id="nome" required />
+          <span class="erro" id="erro-nome"></span>
+        </p>
+        <p>
+          Email: <input type="email" id="email" required />
+          <span class="erro" id="erro-email"></span>
+        </p>
+        <p>
+          Idade: <input type="number" id="idade" required />
+          <span class="erro" id="erro-idade"></span>
+        </p>
         <input type="submit" value="Enviar" />
       </form>
 
       <h2>Exercício 6</h2>
       <table>
           <tr>
-              <th>id</th>
+              <th>ID</th>
               <th>Nome</th>
               <th>E-mail</th>
               <th>Idade</th>
+              <th>Ações</th>
           </tr>
           <tbody id="tbUsuarios"></tbody>
       </table>
@@ -50,121 +60,144 @@
       <input type="button" value="Maiores 18" onclick="filtrarMaiores()" />
       <input type="button" value="Limpar filtro" onclick="limparFiltro()" />
     </section>
+    <script src="script.js"></script>
   </body>
   <script>
-    function carregar() {
-      let tema = localStorage.getItem("tema");
-      if (tema) {
-        document.getElementById("tema").className = tema;
-      }
-    }
+   function carregar() {
+  let tema = localStorage.getItem("tema");
+  if (tema) {
+    document.getElementById("tema").className = tema;
+  }
+}
 
-    function trocarTema() {
-      let temaElement = document.getElementById("tema");
-      temaElement.classList.toggle("temaClaro");
-      temaElement.classList.toggle("temaEscuro");
-      localStorage.setItem("tema", temaElement.className);
-    }
+function trocarTema() {
+  let temaElement = document.getElementById("tema");
+  temaElement.classList.toggle("temaClaro");
+  temaElement.classList.toggle("temaEscuro");
+  localStorage.setItem("tema", temaElement.className);
+}
 
-    function adicionarItem() {
-      const texto = document.getElementById("texto");
-      if (texto.value.trim()) {
-        let lista = document.getElementById("lista");
-        let item = document.createElement("li");
-        item.textContent = texto.value;
-        lista.appendChild(item);
-        texto.value = "";
-      }
-    }
+function adicionarItem() {
+  const texto = document.getElementById("texto");
+  if (texto.value.trim()) {
+    let lista = document.getElementById("lista");
+    let item = document.createElement("li");
+    item.textContent = texto.value;
+    lista.appendChild(item);
+    texto.value = "";
+  }
+}
 
-    function trazerObjetoResponse() {
-      fetch("https://67bfa402b9d02a9f2246bfcd.mockapi.io/mensagem")
-        .then(response => response.json())
-        .then(data => {
-          document.getElementById("mostraMensagem").innerText = data[0].mensagem + " - id: " + data[0].id;
-        });
-    }
+function trazerObjetoResponse() {
+  fetch("https://67bfa402b9d02a9f2246bfcd.mockapi.io/mensagem")
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById("mostraMensagem").innerText = data[0].mensagem + " - id: " + data[0].id;
+    });
+}
 
-    function cadastrarUsuario(event) {
-      event.preventDefault();
-      const nome = document.getElementById("nome").value;
-      const email = document.getElementById("email").value;
-      const idade = parseInt(document.getElementById("idade").value);
-      const dados = { nome, email, idade };
+// Validação do formulário
+function validarFormulario() {
+  let nome = document.getElementById("nome").value.trim();
+  let email = document.getElementById("email").value.trim();
+  let idade = document.getElementById("idade").value.trim();
+  let valido = true;
 
-      fetch("https://67bfa402b9d02a9f2246bfcd.mockapi.io/usuario", {
-        method: 'POST', 
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dados)
-      })
-      .then(response => response.json())
-      .then(() => {
-        alert('Usuário cadastrado com sucesso');
-        listarUsuarios(null);
-      })
-      .catch(error => console.error('Erro ao cadastrar: ', error));
-    }
-//exercicio 8
-    function listarUsuarios() {
-      fetch("https://67bfa402b9d02a9f2246bfcd.mockapi.io/usuario")
-      .then(response => response.json())
-      .then(dados => {
-        let tbUsuario = document.getElementById("tbUsuarios");
-        tbUsuario.innerHTML = "";
+  document.getElementById("erro-nome").textContent = "";
+  document.getElementById("erro-email").textContent = "";
+  document.getElementById("erro-idade").textContent = "";
 
-        dados.forEach(user => {
-          const linha = document.createElement("tr");
-          linha.innerHTML = `
-            <td>${user.id}</td>
-            <td><input type="text" value="${user.nome}" id="nome-${user.id}" /></td>
-            <td><input type="email" value="${user.email}" id="email-${user.id}" /></td>
-            <td><input type="number" value="${user.idade}" id="idade-${user.id}" /></td>
-            <td>
-              <button onclick="editarUsuario(${user.id})">Editar</button>
-              <button onclick="excluirUsuario(${user.id})">Excluir</button>
-            </td>
-          `;
-          tbUsuario.appendChild(linha);
-        });
-      });
-    }
-    //exercicio 8
-    function editarUsuario(id) {
-      const nome = document.getElementById(`nome-${id}`).value;
-      const email = document.getElementById(`email-${id}`).value;
-      const idade = parseInt(document.getElementById(`idade-${id}`).value);
-      
-      fetch(`https://67bfa402b9d02a9f2246bfcd.mockapi.io/usuario/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nome, email, idade })
-      })
-      .then(() => {
-        alert('Usuário atualizado!');
-        listarUsuarios();
-      });
-    }
-    //exercicio 8
-    function excluirUsuario(id) {
-      if (confirm("Tem certeza que deseja excluir este usuário?")) {
-        fetch(`https://67bfa402b9d02a9f2246bfcd.mockapi.io/usuario/${id}`, {
-          method: 'DELETE'
-        })
-        .then(() => {
-          alert('Usuário excluído!');
-          listarUsuarios();
-        });
-      }
-    }
+  if (nome === "") {
+    document.getElementById("erro-nome").textContent = "Nome é obrigatório!";
+    valido = false;
+  }
+  if (email === "") {
+    document.getElementById("erro-email").textContent = "E-mail é obrigatório!";
+    valido = false;
+  }
+  if (idade === "") {
+    document.getElementById("erro-idade").textContent = "Idade é obrigatória!";
+    valido = false;
+  }
 
-    function limparFiltro() {
-      listarUsuarios(null);
-    }
+  return valido;
+}
 
-    function filtrarMaiores() {
-      listarUsuarios(18);
-    }
+function cadastrarUsuario(event) {
+  event.preventDefault();
+  
+  if (!validarFormulario()) return;
 
-    listarUsuarios(null);
+  const nome = document.getElementById("nome").value;
+  const email = document.getElementById("email").value;
+  const idade = parseInt(document.getElementById("idade").value);
+  const dados = { nome, email, idade };
+
+  fetch("https://67bfa402b9d02a9f2246bfcd.mockapi.io/usuario", {
+    method: 'POST', 
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(dados)
+  })
+  .then(response => response.json())
+  .then(() => {
+    alert('Usuário cadastrado com sucesso');
+    listarUsuarios();
+  })
+  .catch(error => console.error('Erro ao cadastrar: ', error));
+}
+
+function listarUsuarios() {
+  fetch("https://67bfa402b9d02a9f2246bfcd.mockapi.io/usuario")
+  .then(response => response.json())
+  .then(dados => {
+    let tbUsuario = document.getElementById("tbUsuarios");
+    tbUsuario.innerHTML = "";
+
+    dados.forEach(user => {
+      const linha = document.createElement("tr");
+      linha.innerHTML = `
+        <td>${user.id}</td>
+        <td><input type="text" value="${user.nome}" id="nome-${user.id}" /></td>
+        <td><input type="email" value="${user.email}" id="email-${user.id}" /></td>
+        <td><input type="number" value="${user.idade}" id="idade-${user.id}" /></td>
+        <td>
+          <button onclick="editarUsuario(${user.id})">Editar</button>
+          <button onclick="excluirUsuario(${user.id})">Excluir</button>
+        </td>
+      `;
+      tbUsuario.appendChild(linha);
+    });
+  });
+}
+
+function editarUsuario(id) {
+  const nome = document.getElementById(`nome-${id}`).value;
+  const email = document.getElementById(`email-${id}`).value;
+  const idade = parseInt(document.getElementById(`idade-${id}`).value);
+  
+  fetch(`https://67bfa402b9d02a9f2246bfcd.mockapi.io/usuario/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ nome, email, idade })
+  })
+  .then(() => {
+    alert('Usuário atualizado!');
+    listarUsuarios();
+  });
+}
+
+function excluirUsuario(id) {
+  if (confirm("Tem certeza que deseja excluir este usuário?")) {
+    fetch(`https://67bfa402b9d02a9f2246bfcd.mockapi.io/usuario/${id}`, {
+      method: 'DELETE'
+    })
+    .then(() => {
+      alert('Usuário excluído!');
+      listarUsuarios();
+    });
+  }
+}
+
+listarUsuarios();
   </script>
 </html>
